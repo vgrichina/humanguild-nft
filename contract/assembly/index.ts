@@ -12,7 +12,7 @@
  *
  */
 
-import { Context, logging, storage, util } from 'near-sdk-as'
+import { Context, logging, storage, util, math } from 'near-sdk-as'
 import { Web4Request, Web4Response } from './web4'
 
 const DEFAULT_MESSAGE = 'Hello'
@@ -41,17 +41,27 @@ export function setGreeting(message: string): void {
 }
 
 export function renderNFT(accountId: string): string {
+  let seed = math.hash(accountId);
+  let h1 = seed[0];
+  let h2 = seed[1];
+  let cx = f64(seed[2]) / 255.;
+  let cy = f64(seed[3]) / 255.;
+  let r = (f64(seed[4]) / 255.) * 0.7 + 1;
+  let s1 = seed[5] % 80 + 20;
+  let s2 = seed[6] % 80 + 20;
+
   const svg = `
     <svg width="512" height="512" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <defs>
-          <radialGradient id="RadialGradient2" cx="0.25" cy="0.25" r="1.2">
-            <stop offset="0%" stop-color="hsl(45, 50%, 50%)"/>
-            <stop offset="100%" stop-color="hsl(360, 100%, 70%)"/>
+          <radialGradient id="RadialGradient2" cx="${cx}" cy="${cy}" r="${r}">
+            <stop offset="0%" stop-color="hsl(${h1}, ${s1}%, 50%)"/>
+            <stop offset="100%" stop-color="hsl(${h2}, ${s2}%, 70%)"/>
           </radialGradient>
       </defs>
       <rect x="0" y="0" rx="15" ry="15" width="100%" height="100%" fill="url(#RadialGradient2)">
       </rect>
-      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >${accountId}</text>
+      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >🚧 This NFT is under construction 🚧</text>
+      <text x="50%" y="464" style="font-family: sans-serif; font-size: 48px; fill: white;" text-anchor="middle" >${accountId}</text>
     </svg>
   `;
   return svg;
