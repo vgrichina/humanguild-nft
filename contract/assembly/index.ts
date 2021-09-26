@@ -12,7 +12,8 @@
  *
  */
 
-import { Context, logging, storage } from 'near-sdk-as'
+import { Context, logging, storage, util } from 'near-sdk-as'
+import { Web4Request, Web4Response } from './web4'
 
 const DEFAULT_MESSAGE = 'Hello'
 
@@ -37,4 +38,26 @@ export function setGreeting(message: string): void {
   )
 
   storage.set(account_id, message)
+}
+
+export function renderNFT(accountId: string): string {
+  const svg = `
+    <svg width="512" height="512" version="1.1" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+          <radialGradient id="RadialGradient2" cx="0.25" cy="0.25" r="1.2">
+            <stop offset="0%" stop-color="hsl(45, 50%, 50%)"/>
+            <stop offset="100%" stop-color="hsl(360, 100%, 70%)"/>
+          </radialGradient>
+      </defs>
+      <rect x="0" y="0" rx="15" ry="15" width="100%" height="100%" fill="url(#RadialGradient2)">
+      </rect>
+      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >${accountId}</text>
+    </svg>
+  `;
+  return svg;
+}
+
+export function web4_get(request: Web4Request): Web4Response {
+  const svg = renderNFT(request.query.get('accountId')[0]);
+  return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
 }
