@@ -1,44 +1,5 @@
-/*
- * This is an example of an AssemblyScript smart contract with two simple,
- * symmetric functions:
- *
- * 1. setGreeting: accepts a greeting, such as "howdy", and records it for the
- *    user (account_id) who sent the request
- * 2. getGreeting: accepts an account_id and returns the greeting saved for it,
- *    defaulting to "Hello"
- *
- * Learn more about writing NEAR smart contracts with AssemblyScript:
- * https://docs.near.org/docs/roles/developer/contracts/assemblyscript
- *
- */
-
-import { Context, logging, storage, util, math } from 'near-sdk-as'
+import { Context, PersistentUnorderedMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
 import { Web4Request, Web4Response } from './web4'
-
-const DEFAULT_MESSAGE = 'Hello'
-
-// Exported functions will be part of the public interface for your smart contract.
-// Feel free to extract behavior to non-exported functions!
-export function getGreeting(accountId: string): string | null {
-  // This uses raw `storage.get`, a low-level way to interact with on-chain
-  // storage for simple contracts.
-  // If you have something more complex, check out persistent collections:
-  // https://docs.near.org/docs/roles/developer/contracts/assemblyscript#imports
-  return storage.get<string>(accountId, DEFAULT_MESSAGE)
-}
-
-export function setGreeting(message: string): void {
-  const account_id = Context.sender
-
-  // Use logging.log to record logs permanently to the blockchain!
-  logging.log(
-    // String interpolation (`like ${this}`) is a work in progress:
-    // https://github.com/AssemblyScript/assemblyscript/pull/1115
-    'Saving greeting "' + message + '" for account "' + account_id + '"'
-  )
-
-  storage.set(account_id, message)
-}
 
 export function renderNFT(accountId: string): string {
   let seed = math.hash(accountId);
@@ -67,7 +28,138 @@ export function renderNFT(accountId: string): string {
   return svg;
 }
 
+const NFT_SPEC = 'nft-1.0.0'
+const NFT_NAME = '.near club'
+const NFT_SYMBOL = 'dotNEAR'
+
+@nearBindgen
+class TokenMetadata {
+  constructor(
+    public title: string,
+    public description: string,
+    public copies: u8,
+    public media: string,
+    // public media_hash: string = '',
+    public issued_at: u64,
+    // public expires_at: string = '',
+    // public starts_at: string = '',
+    // public updated_at: string = '',
+    // public extra: string = '',
+    // public reference: string = '',
+    // public reference_hash: string = ''
+  ) { }
+}
+
+@nearBindgen
+class NFTContractMetadata {
+  constructor(
+    public spec: string = NFT_SPEC,
+    public name: string = NFT_NAME,
+    public symbol: string = NFT_SYMBOL,
+    public icon: string = '',
+    // public base_uri: string = '',
+    // public reference: string = '',
+    // public reference_hash: string = '',
+  ) { }
+}
+
+@nearBindgen
+class Token {
+    id: string
+    owner_id: string
+    creator: string
+    metadata: TokenMetadata
+
+    constructor(creator: string, issued_at: u64) {
+      this.id = creator;
+      this.creator = creator;
+      this.owner_id = creator;
+
+      const title = `${creator}'s club card`;
+
+      const copies: u8 = 1
+
+      let media = `http://localhost:3000/img/${creator}`;
+      if (Context.contractName.endsWith('.near') || Context.contractName.endsWith('.testnet')) {
+        media = `https://${Context.contractName}.page/img/${creator}`;
+      }
+      this.metadata = new TokenMetadata(
+          title,
+          `.near club card`,
+          copies,
+          media,
+          issued_at,
+      )
+    }
+}
+
+const minted = new PersistentUnorderedMap<string, u64>('minted');
+
+
 export function web4_get(request: Web4Request): Web4Response {
-  const svg = renderNFT(request.query.get('accountId')[0]);
+  // const svg = renderNFT(request.query.get('accountId')[0]);
+  assert(request.path.startsWith('/img'));
+  const parts = request.path.split('/');
+  assert(parts.length == 3);
+  const accountId = parts[2];
+  // TODO: Validate account ID more thoroughly to make sure code cannot be injected
+  assert(!accountId.includes('&') && !accountId.includes('<'));
+  const svg = renderNFT(accountId);
   return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
+}
+
+export function nft_token(token_id: string): Token | null {
+  if (!minted.contains(token_id)) {
+    return null;
+  }
+
+  const issued_at = minted.getSome(token_id);
+  return new Token(token_id, issued_at);
+}
+
+export function nft_total_supply(): u64 {
+  return minted.length;
+}
+
+export function nft_tokens(from_index: u64 = 0, limit: u8 = 0): Token[] {
+  let entries: MapEntry<string, u64>[] = minted.entries(<i32>from_index, <i32>limit || minted.length);
+  let tokens: Array<Token> = []
+
+  for (let i = 0; i < entries.length; i++) {
+    tokens.push(nft_token(entries[i].key)!);
+  }
+
+  return tokens
+}
+
+export function nft_supply_for_owner(account_id: string): u64 {
+  if (!minted.contains(account_id)) {
+    return 0;
+  }
+
+  return 1;
+}
+
+export function nft_tokens_for_owner(
+  account_id: string,
+  from_index: u64 = 0,
+  limit: u8 = 0
+): Token[] {
+  if (!minted.contains(account_id) || from_index > 0 || limit < 1) {
+    return [];
+  }
+
+  return [nft_token(account_id)!];
+}
+
+export function nft_metadata(): NFTContractMetadata {
+  return new NFTContractMetadata();
+}
+
+// TODO: Non-standard, check what other apps ended up using
+export function nft_mint_to(receiver_id: string): void {
+  assert(Context.sender == Context.contractName, 'Can only be called by owner');
+  assert(!minted.contains(receiver_id), `${receiver_id} minted already`);
+
+  minted.set(receiver_id, Context.blockTimestamp);
 }
