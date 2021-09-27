@@ -77,7 +77,8 @@ export default function App() {
             Change your account name in Twitter to include your <code>.near</code> username, e.g. <b>Illia Polosukhin (root.near)</b>.
           </li>
           <li>
-            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('TODO: Tweet text')}`}>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+              'Check out this NFT drop: https://twitter.com/vgrichina/status/1442392328610598915?s=20\n\n#dotnearfollowdotnear')}`}>
               Tweet</a> about this project, including <code>#dotnearfollowdotnear</code> hashtag.
           </li>
           <li>
