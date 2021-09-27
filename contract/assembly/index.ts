@@ -1,5 +1,5 @@
 import { Context, PersistentUnorderedMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
-import { Web4Request, Web4Response } from './web4'
+import { bodyUrl, Web4Request, Web4Response } from './web4'
 
 export function renderNFT(accountId: string): string {
   let seed = math.hash(accountId);
@@ -105,15 +105,17 @@ export function getTwitterUsername(accountId: string): string | null {
 }
 
 export function web4_get(request: Web4Request): Web4Response {
-  // const svg = renderNFT(request.query.get('accountId')[0]);
-  assert(request.path.startsWith('/img'));
-  const parts = request.path.split('/');
-  assert(parts.length == 3);
-  const accountId = parts[2];
-  // TODO: Validate account ID more thoroughly to make sure code cannot be injected
-  assert(!accountId.includes('&') && !accountId.includes('<'));
-  const svg = renderNFT(accountId);
-  return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
+  if (request.path.startsWith('/img')) {
+    const parts = request.path.split('/');
+    assert(parts.length == 3);
+    const accountId = parts[2];
+    // TODO: Validate account ID more thoroughly to make sure code cannot be injected
+    assert(!accountId.includes('&') && !accountId.includes('<'));
+    const svg = renderNFT(accountId);
+    return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
+  }
+
+  return bodyUrl(`ipfs://bafybeih4yhbm2owbriaqy4omtkrroirzkdnlnu4jlxfyfqnn4mlgpwks5m${request.path}`);
 }
 
 export function nft_token(token_id: string): Token | null {

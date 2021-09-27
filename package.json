@@ -9,6 +9,7 @@
     "build:web": "parcel build src/index.html --public-url ./",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
+    "deploy:ipfs": "npm run build:web && npx ipfs-deploy dist",
     "deploy": "npm run build:contract && npm run deploy:contract",
     "deploy-testnet": "yarn build:contract && near deploy dotz.testnet out/main.wasm",
     "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
