@@ -7,8 +7,8 @@ import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
 export default function App() {
-  // use React Hooks to store greeting in component state
-  const [greeting, setGreeting] = React.useState()
+  // use React Hooks to store username in component state
+  const [username, setUsername] = React.useState()
 
   // when the user has not yet interacted with the form, disable the button
   const [buttonDisabled, setButtonDisabled] = React.useState(true)
@@ -24,9 +24,9 @@ export default function App() {
       if (window.walletConnection.isSignedIn()) {
 
         // window.contract is set by initContract in index.js
-        window.contract.getGreeting({ accountId: window.accountId })
-          .then(greetingFromContract => {
-            setGreeting(greetingFromContract)
+        window.contract.getTwitterUsername({ accountId: window.accountId })
+          .then(usernameFromContract => {
+            setUsername(usernameFromContract)
           })
       }
     },
@@ -41,16 +41,10 @@ export default function App() {
   if (!window.walletConnection.isSignedIn()) {
     return (
       <main>
-        <h1>Welcome to NEAR!</h1>
+        <h1>Welcome to <code>.near</code> club NFT drop</h1>
         <p>
-          To make use of the NEAR blockchain, you need to sign in. The button
+          To claim the NFT drop, you need to sign in. The button
           below will sign you in using NEAR Wallet.
-        </p>
-        <p>
-          By default, when your app runs in "development" mode, it connects
-          to a test network ("testnet") wallet. This works just like the main
-          network ("mainnet") wallet, but the NEAR Tokens on testnet aren't
-          convertible to other currencies – they're just for testing!
         </p>
         <p>
           Go ahead and click the button below to try it out:
@@ -70,35 +64,49 @@ export default function App() {
       </button>
       <main>
         <h1>
-          <label
-            htmlFor="greeting"
-            style={{
-              color: 'var(--secondary)',
-              borderBottom: '2px solid var(--secondary)'
-            }}
-          >
-            {greeting}
-          </label>
+          Hello
           {' '/* React trims whitespace around tags; insert literal space character when needed */}
           {window.accountId}!
         </h1>
+        { username
+          ? <p>You've already connected <a href={`https://twitter.com/${username}`}>{username}</a> Twitter account. You can update to use different Twitter account:</p>
+          : <p>Claim your <code>.near</code> club membership using these instructions:</p>
+        }
+        <ol>
+          <li>
+            Change your account name in Twitter to include your <code>.near</code> username, e.g. <b>Illia Polosukhin (root.near)</b>.
+          </li>
+          <li>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('TODO: Tweet text')}`}>
+              Tweet</a> about this project, including <code>#dotnearfollowdotnear</code> hashtag.
+          </li>
+          <li>
+            Submit your request in the form below.
+          </li>
+          <li>
+            Wait for few days until you receive NFT in the wallet. Keep your .near account name on Twitter.
+          </li>
+          <li>
+            NFT you get is dynamic and generated fully on chain. It'll keep updating as we grow .near community.
+          </li>
+        </ol>
+
         <form onSubmit={async event => {
           event.preventDefault()
 
           // get elements from the form using their id attribute
-          const { fieldset, greeting } = event.target.elements
+          const { fieldset, username } = event.target.elements
 
           // hold onto new user-entered value from React's SynthenticEvent for use after `await` call
-          const newGreeting = greeting.value
+          const newUsername = username.value
 
           // disable the form while the value gets updated on-chain
           fieldset.disabled = true
 
           try {
             // make an update call to the smart contract
-            await window.contract.setGreeting({
-              // pass the value that the user entered in the greeting field
-              message: newGreeting
+            await window.contract.setTwitterUsername({
+              username: newUsername
             })
           } catch (e) {
             alert(
@@ -112,8 +120,8 @@ export default function App() {
             fieldset.disabled = false
           }
 
-          // update local `greeting` variable to match persisted value
-          setGreeting(newGreeting)
+          // update local `username` variable to match persisted value
+          setUsername(newUsername)
 
           // show Notification
           setShowNotification(true)
@@ -126,47 +134,36 @@ export default function App() {
         }}>
           <fieldset id="fieldset">
             <label
-              htmlFor="greeting"
+              htmlFor="username"
               style={{
                 display: 'block',
                 color: 'var(--gray)',
                 marginBottom: '0.5em'
               }}
             >
-              Change greeting
+              Your Twitter username
             </label>
             <div style={{ display: 'flex' }}>
               <input
                 autoComplete="off"
-                defaultValue={greeting}
-                id="greeting"
-                onChange={e => setButtonDisabled(e.target.value === greeting)}
+                defaultValue={username}
+                id="username"
+                onChange={e => setButtonDisabled(e.target.value === username)}
                 style={{ flex: 1 }}
               />
-              <button
-                disabled={buttonDisabled}
-                style={{ borderRadius: '0 5px 5px 0' }}
-              >
-                Save
-              </button>
             </div>
+            <button
+              disabled={buttonDisabled}
+              style={{ borderRadius: '0 5px 5px 0' }}
+            >
+              Save
+            </button>
           </fieldset>
         </form>
-        <p>
-          Look at that! A Hello World app! This greeting is stored on the NEAR blockchain. Check it out:
-        </p>
-        <ol>
-          <li>
-            Look in <code>src/App.js</code> and <code>src/utils.js</code> – you'll see <code>getGreeting</code> and <code>setGreeting</code> being called on <code>contract</code>. What's this?
-          </li>
-          <li>
-            Ultimately, this <code>contract</code> code is defined in <code>assembly/main.ts</code> – this is the source code for your <a target="_blank" rel="noreferrer" href="https://docs.near.org/docs/roles/developer/contracts/intro">smart contract</a>.</li>
-          <li>
-            When you run <code>yarn dev</code>, the code in <code>assembly/main.ts</code> gets deployed to the NEAR testnet. You can see how this happens by looking in <code>package.json</code> at the <code>scripts</code> section to find the <code>dev</code> command.</li>
-        </ol>
+
         <hr />
         <p>
-          To keep learning, check out <a target="_blank" rel="noreferrer" href="https://docs.near.org">the NEAR docs</a> or look through some <a target="_blank" rel="noreferrer" href="https://examples.near.org">example apps</a>.
+          To see how to make apps like this, check out <a target="_blank" rel="noreferrer" href="https://docs.near.org">the NEAR docs</a> or look through some <a target="_blank" rel="noreferrer" href="https://examples.near.org">example apps</a>.
         </p>
       </main>
       {showNotification && <Notification />}
@@ -183,7 +180,7 @@ function Notification() {
         {window.accountId}
       </a>
       {' '/* React trims whitespace around tags; insert literal space character when needed */}
-      called method: 'setGreeting' in contract:
+      called method: 'setTwitterUsername' in contract:
       {' '}
       <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.contract.contractId}`}>
         {window.contract.contractId}

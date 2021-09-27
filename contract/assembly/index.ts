@@ -94,7 +94,15 @@ class Token {
 }
 
 const minted = new PersistentUnorderedMap<string, u64>('minted');
+const twitterUsernames = new PersistentUnorderedMap<string, string>('twitter');
 
+export function setTwitterUsername(username: string): void {
+  twitterUsernames.set(Context.sender, username);
+}
+
+export function getTwitterUsername(accountId: string): string | null {
+  return twitterUsernames.get(accountId);
+}
 
 export function web4_get(request: Web4Request): Web4Response {
   // const svg = renderNFT(request.query.get('accountId')[0]);
