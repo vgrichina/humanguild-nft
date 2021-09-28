@@ -4,6 +4,7 @@ import { login, logout } from './utils'
 import './global.css'
 
 import getConfig from './config'
+import { utils } from 'near-api-js'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
 export default function App() {
@@ -82,15 +83,20 @@ export default function App() {
               Tweet</a> about this project, including <code>#dotnearfollowdotnear</code> hashtag.
           </li>
           <li>
-            Submit your request in the form below.
+            Submit your request in the form below (includes 0.05 NEAR fee to cover the <a href="https://docs.near.org/docs/concepts/storage-staking">storage costs</a>)
           </li>
           <li>
-            Wait for few days until you receive NFT in the wallet. Keep your .near account name on Twitter.
+            Wait for <b>few days</b> until you receive NFT in the wallet. Keep your .near account name on Twitter.
           </li>
           <li>
             NFT you get is dynamic and generated fully on chain. It'll keep updating as we grow .near community.
           </li>
         </ol>
+
+        {username && <p>
+          Note that <b>you've already submitted</b> your username as it is displayed in the form below.
+          You can submit again to update it in case you made a mistake.
+        </p>}
 
         <form onSubmit={async event => {
           event.preventDefault()
@@ -106,9 +112,11 @@ export default function App() {
 
           try {
             // make an update call to the smart contract
+            const BOATLOAD_OF_GAS = '300000000000000';
+            const FEE = utils.format.parseNearAmount('0.05');
             await window.contract.setTwitterUsername({
               username: newUsername
-            })
+            }, BOATLOAD_OF_GAS, FEE);
           } catch (e) {
             alert(
               'Something went wrong! ' +
@@ -142,7 +150,7 @@ export default function App() {
                 marginBottom: '0.5em'
               }}
             >
-              Your Twitter username
+              Your Twitter username (one that starts with @).
             </label>
             <div style={{ display: 'flex' }}>
               <input
