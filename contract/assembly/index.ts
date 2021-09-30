@@ -33,8 +33,8 @@ export function renderNFT(accountId: string, title: string): string {
 }
 
 const NFT_SPEC = 'nft-1.0.0'
-const NFT_NAME = '.near club'
-const NFT_SYMBOL = 'dotNEAR'
+const NFT_NAME = 'HumanGuild NFT meetup'
+const NFT_SYMBOL = 'HUMAN'
 
 @nearBindgen
 class TokenMetadata {
