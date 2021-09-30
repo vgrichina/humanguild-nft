@@ -11,7 +11,7 @@
     "deploy:contract": "near deploy",
     "deploy:ipfs": "npm run build:web && npx ipfs-deploy dist",
     "deploy": "npm run build:contract && npm run deploy:contract",
-    "deploy-testnet": "yarn build:contract && near deploy humanguild-nft.testnet out/main.wasm",
+    "deploy-testnet": "yarn build:contract && near deploy humanguild-nft.vg out/main.wasm",
     "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
     "start": "env-cmd -f ./neardev/dev-account.env parcel src/index.html",
     "dev": "nodemon --watch contract -e ts --exec \"npm run start\"",
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "near-api-js": "~0.36.3",
+    "near-seed-phrase": "^0.2.0",
     "react": "~17.0.1",
     "react-dom": "~17.0.1",
     "regenerator-runtime": "~0.13.5"
