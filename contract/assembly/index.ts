@@ -1,10 +1,10 @@
-import { Context, PersistentUnorderedMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
-import { bodyUrl, Web4Request, Web4Response } from './web4'
+import { Context, PersistentUnorderedMap, PersistentMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
+import { bodyUrl, htmlResponse, Web4Request, Web4Response } from './web4'
 
-export function renderNFT(accountId: string): string {
+export function renderNFT(accountId: string, title: string): string {
   let seed = math.hash(accountId);
-  let h1 = seed[0];
-  let h2 = seed[1];
+  let h1 = (seed[0] + seed[7]) % 360;
+  let h2 = (seed[1] + seed[8]) % 360;
   let cx = f64(seed[2]) / 255.;
   let cy = f64(seed[3]) / 255.;
   let r = (f64(seed[4]) / 255.) * 0.7 + 1;
@@ -21,7 +21,11 @@ export function renderNFT(accountId: string): string {
       </defs>
       <rect x="0" y="0" rx="15" ry="15" width="100%" height="100%" fill="url(#RadialGradient2)">
       </rect>
-      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >🚧 This NFT is under construction 🚧</text>
+      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >${title}</text>
+      <text x="50%" y="256" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >
+        <tspan x="50%">I went to NFT meetup and</tspan>
+        <tspan x="50%" dy="1.2em">all I got was this lousy NFT</tspan>
+      </text>
       <text x="50%" y="464" style="font-family: sans-serif; font-size: 48px; fill: white;" text-anchor="middle" >${accountId}</text>
     </svg>
   `;
@@ -70,12 +74,10 @@ class Token {
     creator: string
     metadata: TokenMetadata
 
-    constructor(creator: string, issued_at: u64) {
+    constructor(creator: string, issued_at: u64, title: string) {
       this.id = creator;
       this.creator = creator;
       this.owner_id = creator;
-
-      const title = `${creator}'s club card`;
 
       const copies: u8 = 1
 
@@ -85,7 +87,7 @@ class Token {
       }
       this.metadata = new TokenMetadata(
           title,
-          `.near club card`,
+          `NFT Dolores Park`,
           copies,
           media,
           issued_at,
@@ -94,15 +96,7 @@ class Token {
 }
 
 const minted = new PersistentUnorderedMap<string, u64>('minted');
-const twitterUsernames = new PersistentUnorderedMap<string, string>('twitter');
-
-export function setTwitterUsername(username: string): void {
-  twitterUsernames.set(Context.sender, username);
-}
-
-export function getTwitterUsername(accountId: string): string | null {
-  return twitterUsernames.get(accountId);
-}
+const titles = new PersistentMap<string, string>('title');
 
 export function web4_get(request: Web4Request): Web4Response {
   if (request.path.startsWith('/img')) {
@@ -111,11 +105,12 @@ export function web4_get(request: Web4Request): Web4Response {
     const accountId = parts[2];
     // TODO: Validate account ID more thoroughly to make sure code cannot be injected
     assert(!accountId.includes('&') && !accountId.includes('<'));
-    const svg = renderNFT(accountId);
+    const svg = renderNFT(accountId, titles.getSome(accountId));
     return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
   }
 
-  return bodyUrl(`ipfs://bafybeihgjbjqmhexuqp3jevhrgex2vsydnjzgeyc4jpie5nrgewjk6nbpy${request.path}`);
+  // TODO: 404 and then README, etc
+  return htmlResponse('not found');
 }
 
 export function nft_token(token_id: string): Token | null {
@@ -124,7 +119,7 @@ export function nft_token(token_id: string): Token | null {
   }
 
   const issued_at = minted.getSome(token_id);
-  return new Token(token_id, issued_at);
+  return new Token(token_id, issued_at, titles.getSome(token_id));
 }
 
 export function nft_total_supply(): u64 {
@@ -166,10 +161,25 @@ export function nft_metadata(): NFTContractMetadata {
   return new NFTContractMetadata();
 }
 
+function requireSelf(): void {
+  assert(Context.sender == Context.contractName, 'Can only be called by self');
+}
+
+function requireSelfOrOwner(): void {
+  assert(Context.sender == Context.contractName || Context.sender == storage.get('owner', '')!, 'Can only be called by self or owner');
+}
+
 // TODO: Non-standard, check what other apps ended up using
-export function nft_mint_to(receiver_id: string): void {
-  assert(Context.sender == Context.contractName, 'Can only be called by owner');
+export function nft_mint_to(receiver_id: string, title: string): void {
+  requireSelfOrOwner();
   assert(!minted.contains(receiver_id), `${receiver_id} minted already`);
 
   minted.set(receiver_id, Context.blockTimestamp);
+  titles.set(receiver_id, title);
+}
+
+export function setOwner(owner: string): void {
+  requireSelf();
+
+  storage.set('owner', owner);
 }

@@ -1,4 +1,4 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME ||'dotz.near'
+const CONTRACT_NAME = process.env.CONTRACT_NAME
 
 function getConfig(env) {
   switch (env) {
@@ -8,7 +8,7 @@ function getConfig(env) {
     return {
       networkId: 'mainnet',
       nodeUrl: 'https://rpc.mainnet.near.org',
-      contractName: CONTRACT_NAME,
+      contractName: CONTRACT_NAME || 'nft.humanguild.near',
       walletUrl: 'https://wallet.near.org',
       helperUrl: 'https://helper.mainnet.near.org',
       explorerUrl: 'https://explorer.mainnet.near.org',
@@ -18,7 +18,7 @@ function getConfig(env) {
     return {
       networkId: 'testnet',
       nodeUrl: 'https://rpc.testnet.near.org',
-      contractName: CONTRACT_NAME,
+      contractName: CONTRACT_NAME || 'humanguild-nft.testnet',
       walletUrl: 'https://wallet.testnet.near.org',
       helperUrl: 'https://helper.testnet.near.org',
       explorerUrl: 'https://explorer.testnet.near.org',
