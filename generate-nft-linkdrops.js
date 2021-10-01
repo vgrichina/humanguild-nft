@@ -3,7 +3,9 @@ const { InMemoryKeyStore, UnencryptedFileSystemKeyStore } = require('near-api-js
 const { KeyPairEd25519 } = require('near-api-js/lib/utils');
 const { generateSeedPhrase, parseSeedPhrase  } = require('near-seed-phrase');
 
-const LINKDROP_CONTRACT = 'linkdrop.vg';
+// const LINKDROP_CONTRACT = 'linkdrop.vg';
+const LINKDROP_CONTRACT = 'linkdrop.humanguild.near';
+const NUM_LINKS = 100;
 
 (async function() {
     const config = require('./src/config')(process.env.NODE_ENV || 'development');
@@ -15,7 +17,7 @@ const LINKDROP_CONTRACT = 'linkdrop.vg';
     console.log('seedPhrase', seedPhrase);
 
     const account = await near.account(LINKDROP_CONTRACT);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < NUM_LINKS; i++) {
         let { secretKey } = parseSeedPhrase(seedPhrase, `m/44'/397'/0'/${i}'`);
         let keyPair = KeyPair.fromString(secretKey);
         console.log(`${config.walletUrl}/linkdrop/${LINKDROP_CONTRACT}/${keyPair}`);
@@ -30,7 +32,7 @@ const LINKDROP_CONTRACT = 'linkdrop.vg';
                         receiver_id: "%%RECEIVER_ID%%", 
                         title: "September NFT Hangout"
                     }),
-                    gas: "20000000000000",
+                    gas: "10000000000000",
                     deposit: "1"
                 }]
             }]
