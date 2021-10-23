@@ -1,6 +1,8 @@
 import { Context, PersistentUnorderedMap, PersistentMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
 import { bodyUrl, htmlResponse, Web4Request, Web4Response } from './web4'
 
+const PHOTOS = ["https://cloudflare-ipfs.com/ipfs/QmVLydsRBRhqDfegLEoaf5tUQAZmn3qjkNy9UfSfPVG4RV"];
+
 export function renderNFT(accountId: string, title: string): string {
   let seed = math.hash(accountId);
   let h1 = (seed[0] + seed[7]) % 360;
@@ -11,22 +13,20 @@ export function renderNFT(accountId: string, title: string): string {
   let s1 = seed[5] % 80 + 20;
   let s2 = seed[6] % 80 + 20;
 
+  let photoIndex = seed[9] % PHOTOS.length;
+
   const svg = `
     <svg width="512" height="512" version="1.1" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-          <radialGradient id="RadialGradient2" cx="${cx}" cy="${cy}" r="${r}">
-            <stop offset="0%" stop-color="hsl(${h1}, ${s1}%, 50%)"/>
-            <stop offset="100%" stop-color="hsl(${h2}, ${s2}%, 70%)"/>
-          </radialGradient>
-      </defs>
-      <rect x="0" y="0" rx="15" ry="15" width="100%" height="100%" fill="url(#RadialGradient2)">
-      </rect>
-      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >${title}</text>
-      <text x="50%" y="256" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >
+      <image
+        width="100%" height="100%"
+        href="https://cloudflare-ipfs.com/ipfs/QmVLydsRBRhqDfegLEoaf5tUQAZmn3qjkNy9UfSfPVG4RV"
+        preserveAspectRatio="xMinYMin slice" />
+      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white; text-shadow: gray 1px 1px 5px;" text-anchor="middle" >${title}</text>
+      <text x="50%" y="256" style="font-family: sans-serif; font-size: 24px; fill: white; text-shadow: gray 1px 1px 5px;" text-anchor="middle" >
         <tspan x="50%">I went to NFT meetup and</tspan>
         <tspan x="50%" dy="1.2em">all I got was this lousy NFT</tspan>
       </text>
-      <text x="50%" y="464" style="font-family: sans-serif; font-size: 48px; fill: white;" text-anchor="middle" >${accountId}</text>
+      <text x="50%" y="464" style="font-family: sans-serif; font-size: 48px; fill: white; text-shadow: gray 1px 1px 5px;" text-anchor="middle" >${accountId}</text>
     </svg>
   `;
   return svg;
