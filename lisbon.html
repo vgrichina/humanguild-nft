@@ -1,0 +1,30 @@
+<svg width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <clipPath id="triangle-clip">
+      <polygon points="0,0 100,0 100,100"/>
+    </clipPath>
+
+    <g id="triangle-element" clip-path="url(#triangle-clip)">
+      <polygon points="0,0 100,0 100,100" stroke="blue"/>
+      <polygon points="20,0 30,0 30,100 20,100" />
+      <polygon points="0,70 0,80 100,80 100,70" />
+    </g>
+
+    <g id="square-element">
+      <use xlink:href="#triangle-element" x="0" y="0" fill="white" stroke="orange" stroke-width="5px" transform="rotate(45 0 0) scale(1 -1) rotate(-45 0 0) " />
+      <use xlink:href="#triangle-element" x="0" y="0" fill="white" stroke="orange" stroke-width="5px" />
+    </g>
+
+    <g id="tile-element">
+      <use xlink:href="#square-element" />
+      <use xlink:href="#square-element" transform="translate(100 0) rotate(90 50 50)" />
+      <use xlink:href="#square-element" transform="translate(100 100) rotate(180 50 50)" />
+      <use xlink:href="#square-element" transform="translate(0 100) rotate(270 50 50)" />
+    </g>
+  </defs>
+
+  <use xlink:href="#tile-element" />
+  <use xlink:href="#tile-element" transform="translate(200 0) rotate(90 100 100)" />
+  <use xlink:href="#tile-element" transform="translate(200 200) rotate(180 100 100)" />
+  <use xlink:href="#tile-element" transform="translate(0 200) rotate(270 100 100)" />
+</svg>
