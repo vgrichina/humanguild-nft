@@ -6,9 +6,27 @@ function rand(a, b) {
   return Math.random() * (b - a) + a;
 }
 
+const TEXT = [
+  "&amp;&amp;&amp;&amp;",
+  "%%%%",
+  "()()",
+  "{}{}",
+  "[][]",
+  "NEAR",
+  "HUMAN",
+  "QQQQ",
+  "####",
+  "$$$$",
+  "@@@@",
+  "****",
+  "^^^^",
+  "!!!!"
+]
+
 const color1 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(120, 275)})`
 const color2 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(40, 90)})`
 const angle = rand(10, 35)
+const text = TEXT[Math.floor(rand(0, TEXT.length))]
 
 const svg = `
 <svg
@@ -23,7 +41,7 @@ const svg = `
     <g id="triangle-element" clip-path="url(#triangle-clip)">
       <polygon points="0,0 100,0 100,100" stroke="${color1}"/>
       <polygon points="0,0 0,60 50,50 60,0" stroke="${color1}" fill="${color1}" />
-      <text x="40" y="40" stroke-width="0" fill="${color1}" font-size="48" transform="rotate(${angle})">%%%%</text>
+      <text x="40" y="40" stroke-width="0" fill="${color1}" font-size="48" transform="rotate(${angle})">${text}</text>
       <polygon points="20,0 30,0 30,100 20,100" />
       <polygon points="0,70 0,80 100,80 100,70" />
     </g>
