@@ -2,8 +2,12 @@
 
 <script>
 
-const color1 = `hsl(${200}, ${75}%, ${50}%)`;
-const color2 = `hsl(${30}, ${75}%, ${50}%)`;
+function rand(a, b) {
+  return Math.random() * (b - a) + a;
+}
+
+const color1 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(120, 275)})`
+const color2 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(40, 90)})`
 
 document.querySelector('#wrapper').innerHTML = `
 <svg width="400" height="400" viewBox="0 0 400 400">
