@@ -11,7 +11,6 @@
     "deploy:contract": "near deploy",
     "deploy:ipfs": "npm run build:web && npx ipfs-deploy dist",
     "deploy": "npm run build:contract && npm run deploy:contract",
-    "deploy-testnet": "yarn build:contract && near deploy humanguild-nft.vg out/main.wasm",
     "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
     "start": "env-cmd -f ./neardev/dev-account.env parcel src/index.html",
     "dev": "nodemon --watch contract -e ts --exec \"npm run start\"",

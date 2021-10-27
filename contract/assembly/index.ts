@@ -125,8 +125,8 @@ export function renderNFTGradient(accountId: string, title: string): string {
 }
 
 const NFT_SPEC = 'nft-1.0.0'
-const NFT_NAME = 'HumanGuild NFT meetup'
-const NFT_SYMBOL = 'HUMAN'
+const NFT_NAME = 'Tiles of Lisbon'
+const NFT_SYMBOL = 'LISBON'
 
 @nearBindgen
 class TokenMetadata {
