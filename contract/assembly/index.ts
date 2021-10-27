@@ -2,6 +2,98 @@ import { Context, PersistentUnorderedMap, PersistentMap, MapEntry, logging, stor
 import { bodyUrl, htmlResponse, Web4Request, Web4Response } from './web4'
 
 export function renderNFT(accountId: string, title: string): string {
+  if (title.includes('Lisbon')) {
+    return renderNFTLisbon(accountId, title);
+  }
+
+  return renderNFTGradient(accountId, title);
+}
+
+let rand_hash: Uint8Array;
+let hash_position = 0;
+
+function rand(a: i32, b: i32): i32 {
+  if (hash_position >= 16) {
+    rand_hash = math.hash(rand_hash);
+  }
+  // TODO: Support larger range than 256
+  return rand_hash[hash_position] % (b - a + 1) + a;
+}
+
+export function renderNFTLisbon(accountId: string, title: string): string {
+  rand_hash = math.hash(accountId)
+
+  const TEXT = [
+    "&amp;&amp;&amp;&amp;",
+    "%%%%",
+    "()()",
+    "{}{}",
+    "[][]",
+    "NEAR",
+    "HUMAN",
+    "QQQQ",
+    "####",
+    "$$$$",
+    "@@@@",
+    "****",
+    "^^^^",
+    "!!!!"
+  ]
+
+  const color1 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(120, 275)})`
+  const color2 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(40, 90)})`
+  const angle = rand(10, 35)
+  const text = TEXT[rand(0, TEXT.length)]
+
+  const blobPosition1 = rand(20, 40)
+  const blobPosition2 = blobPosition1 + rand(10, 40)
+
+  const rectPosition1 = rand(0, 40)
+  const rectSize1 = rand(7, 21) // TODO: Decide if it's ok for 2 rects to have different size or better have the same
+
+  const rectPosition2 = rand(70, 70)
+  const rectSize2 = rand(7, 21)
+
+  return `
+  <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      version="1.1" width="400" height="400" viewBox="0 0 400 400">
+    <defs>
+      <clipPath id="triangle-clip">
+        <polygon points="0,0 100,0 100,100"/>
+      </clipPath>
+
+      <g id="triangle-element" clip-path="url(#triangle-clip)">
+        <polygon points="0,0 100,0 100,100" stroke="${color1}"/>
+        <polygon points="0,0 0,${blobPosition2} ${blobPosition1},${blobPosition1} ${blobPosition2},0" stroke="${color1}" fill="${color1}" />
+        <text x="40" y="40" stroke-width="0" fill="${color1}" font-size="48" transform="rotate(${angle})">${text}</text>
+        <polygon points="${rectPosition1},0 ${rectPosition1 + rectSize1},0 ${rectPosition1 + rectSize1},100 ${rectPosition1},100" />
+        <polygon points="0,${rectPosition2} 0,${rectPosition2 + rectSize2} 100,${rectPosition2 + rectSize2} 100,${rectPosition2}" />
+      </g>
+
+      <g id="square-element">
+        <use xlink:href="#triangle-element" x="0" y="0" fill="white" stroke="${color2}" stroke-width="4px" transform="rotate(45 0 0) scale(1 -1) rotate(-45 0 0) " />
+        <use xlink:href="#triangle-element" x="0" y="0" fill="white" stroke="${color2}" stroke-width="4px" />
+      </g>
+
+      <g id="tile-element">
+        <use xlink:href="#square-element" />
+        <use xlink:href="#square-element" transform="translate(100 0) rotate(90 50 50)" />
+        <use xlink:href="#square-element" transform="translate(100 100) rotate(180 50 50)" />
+        <use xlink:href="#square-element" transform="translate(0 100) rotate(270 50 50)" />
+      </g>
+    </defs>
+
+    <use xlink:href="#tile-element" />
+    <use xlink:href="#tile-element" transform="translate(200 0) rotate(90 100 100)" />
+    <use xlink:href="#tile-element" transform="translate(200 200) rotate(180 100 100)" />
+    <use xlink:href="#tile-element" transform="translate(0 200) rotate(270 100 100)" />
+  </svg>
+  `
+}
+
+export function renderNFTGradient(accountId: string, title: string): string {
   let seed = math.hash(accountId);
   let h1 = (seed[0] + seed[7]) % 360;
   let h2 = (seed[1] + seed[8]) % 360;
@@ -87,7 +179,7 @@ class Token {
       }
       this.metadata = new TokenMetadata(
           title,
-          `NFT Dolores Park`,
+          `Human Guild NFT`,
           copies,
           media,
           issued_at,
