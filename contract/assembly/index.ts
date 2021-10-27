@@ -20,6 +20,45 @@ function rand(a: i32, b: i32): i32 {
   return rand_hash[hash_position] % (b - a + 1) + a;
 }
 
+function lab2rgb(lab: f64[]): f64[] {
+  let y = (lab[0] + 16) / 116,
+      x = lab[1] / 500 + y,
+      z = y - lab[2] / 200;
+
+  x = 0.95047 * ((x * x * x > 0.008856) ? x * x * x : (x - 16/116) / 7.787);
+  y = 1.00000 * ((y * y * y > 0.008856) ? y * y * y : (y - 16/116) / 7.787);
+  z = 1.08883 * ((z * z * z > 0.008856) ? z * z * z : (z - 16/116) / 7.787);
+
+  let r = x *  3.2406 + y * -1.5372 + z * -0.4986;
+  let g = x * -0.9689 + y *  1.8758 + z *  0.0415;
+  let b = x *  0.0557 + y * -0.2040 + z *  1.0570;
+
+  r = (r > 0.0031308) ? (1.055 * Math.pow(r, 1/2.4) - 0.055) : 12.92 * r;
+  g = (g > 0.0031308) ? (1.055 * Math.pow(g, 1/2.4) - 0.055) : 12.92 * g;
+  b = (b > 0.0031308) ? (1.055 * Math.pow(b, 1/2.4) - 0.055) : 12.92 * b;
+
+  return [(Math.max(0, Math.min(1, r)) * 255), 
+          (Math.max(0, Math.min(1, g)) * 255), 
+          (Math.max(0, Math.min(1, b)) * 255)]
+}
+
+function lch2lab(lch: f64[]): f64[] {
+  let l = lch[0],
+      c = lch[1],
+      h = lch[2];
+
+  let hr = h / 360 * 2 * Math.PI;
+  let a = c * Math.cos(hr);
+  let b = c * Math.sin(hr);
+  return [l, a, b];
+}
+
+
+function lch(l: i32, c: i32, h: i32): string {
+  let rgb = lab2rgb(lch2lab([l, c, h]));
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+}
+
 export function renderNFTLisbon(accountId: string, title: string): string {
   rand_hash = math.hash(accountId)
 
@@ -40,8 +79,8 @@ export function renderNFTLisbon(accountId: string, title: string): string {
     "!!!!"
   ]
 
-  const color1 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(120, 275)})`
-  const color2 = `lch(${rand(25, 75)}% ${rand(40, 100)} ${rand(40, 90)})`
+  const color1 = lch(rand(25, 75), rand(40, 100), rand(120, 275));
+  const color2 = lch(rand(25, 75), rand(40, 100), rand(40, 90));
   const angle = rand(10, 35)
   const text = TEXT[rand(0, TEXT.length)]
 
