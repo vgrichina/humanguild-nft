@@ -82,7 +82,8 @@ export function renderNFTLisbon(accountId: string, title: string): string {
   const color1 = lch(rand(25, 75), rand(40, 100), rand(120, 275));
   const color2 = lch(rand(25, 75), rand(40, 100), rand(40, 90));
   const angle = rand(10, 35)
-  const text = TEXT[rand(0, TEXT.length)]
+  // NOTE: rand can sometimes return upper range
+  const text = TEXT[rand(0, TEXT.length) % TEXT.length]
 
   const blobPosition1 = rand(20, 40)
   const blobPosition2 = blobPosition1 + rand(10, 40)
