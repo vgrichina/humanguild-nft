@@ -30,7 +30,7 @@ const NUM_LINKS = 100;
                     method_name: "nft_mint_to",
                     args: JSON.stringify({
                         receiver_id: "%%RECEIVER_ID%%", 
-                        title: "Ode to Lisbon"
+                        title: "Welcome to vinnitsa.near"
                     }),
                     gas: "10000000000000",
                     deposit: "1"

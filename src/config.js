@@ -8,7 +8,7 @@ function getConfig(env) {
     return {
       networkId: 'mainnet',
       nodeUrl: 'https://rpc.mainnet.near.org',
-      contractName: CONTRACT_NAME || 'lisbon-tiles.near',
+      contractName: CONTRACT_NAME || 'vinnitsa.near',
       walletUrl: 'https://wallet.near.org',
       helperUrl: 'https://helper.mainnet.near.org',
       explorerUrl: 'https://explorer.mainnet.near.org',
