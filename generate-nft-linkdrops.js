@@ -5,7 +5,7 @@ const { generateSeedPhrase, parseSeedPhrase  } = require('near-seed-phrase');
 
 // const LINKDROP_CONTRACT = 'linkdrop.vg';
 const LINKDROP_CONTRACT = 'linkdrop.humanguild.near';
-const NUM_LINKS = 100;
+const NUM_LINKS = 50;
 
 (async function() {
     const config = require('./src/config')(process.env.NODE_ENV || 'development');
@@ -30,7 +30,7 @@ const NUM_LINKS = 100;
                     method_name: "nft_mint_to",
                     args: JSON.stringify({
                         receiver_id: "%%RECEIVER_ID%%", 
-                        title: "September NFT Hangout"
+                        title: "January NFT Hangout"
                     }),
                     gas: "10000000000000",
                     deposit: "1"
