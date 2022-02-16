@@ -1,40 +1,9 @@
 import { Context, PersistentUnorderedMap, PersistentMap, MapEntry, logging, storage, util, math } from 'near-sdk-as'
 import { bodyUrl, htmlResponse, Web4Request, Web4Response } from './web4'
 
-export function renderNFT(accountId: string, title: string): string {
-  let seed = math.hash(accountId);
-  let h1 = (seed[0] + seed[7]) % 360;
-  let h2 = (seed[1] + seed[8]) % 360;
-  let cx = f64(seed[2]) / 255.;
-  let cy = f64(seed[3]) / 255.;
-  let r = (f64(seed[4]) / 255.) * 0.7 + 1;
-  let s1 = seed[5] % 80 + 20;
-  let s2 = seed[6] % 80 + 20;
-
-  const svg = `
-    <svg width="512" height="512" version="1.1" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-          <radialGradient id="RadialGradient2" cx="${cx}" cy="${cy}" r="${r}">
-            <stop offset="0%" stop-color="hsl(${h1}, ${s1}%, 50%)"/>
-            <stop offset="100%" stop-color="hsl(${h2}, ${s2}%, 70%)"/>
-          </radialGradient>
-      </defs>
-      <rect x="0" y="0" rx="15" ry="15" width="100%" height="100%" fill="url(#RadialGradient2)">
-      </rect>
-      <text x="50%" y="48" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >${title}</text>
-      <text x="50%" y="256" style="font-family: sans-serif; font-size: 24px; fill: white;" text-anchor="middle" >
-        <tspan x="50%">I went to NFT meetup and</tspan>
-        <tspan x="50%" dy="1.2em">all I got was this lousy NFT</tspan>
-      </text>
-      <text x="50%" y="464" style="font-family: sans-serif; font-size: 48px; fill: white;" text-anchor="middle" >${accountId}</text>
-    </svg>
-  `;
-  return svg;
-}
-
 const NFT_SPEC = 'nft-1.0.0'
-const NFT_NAME = 'HumanGuild NFT meetup'
-const NFT_SYMBOL = 'HUMAN'
+const NFT_NAME = 'Human Game Jam'
+const NFT_SYMBOL = 'JAM'
 
 @nearBindgen
 class TokenMetadata {
@@ -81,13 +50,10 @@ class Token {
 
       const copies: u8 = 1
 
-      let media = `http://localhost:3000/img/${creator}`;
-      if (Context.contractName.endsWith('.near') || Context.contractName.endsWith('.testnet')) {
-        media = `https://${Context.contractName}.page/img/${creator}`;
-      }
+      let media = `QmTZvmf4ttDGqYKUk53Dsyq2hE9kXF1aqz2x3Be4cuuWzt`;
       this.metadata = new TokenMetadata(
-          title,
-          `NFT Dolores Park`,
+          `${title}: ${creator}`,
+          `Human Game Jam`,
           copies,
           media,
           issued_at,
@@ -100,13 +66,7 @@ const titles = new PersistentMap<string, string>('title');
 
 export function web4_get(request: Web4Request): Web4Response {
   if (request.path.startsWith('/img')) {
-    const parts = request.path.split('/');
-    assert(parts.length == 3);
-    const accountId = parts[2];
-    // TODO: Validate account ID more thoroughly to make sure code cannot be injected
-    assert(!accountId.includes('&') && !accountId.includes('<'));
-    const svg = renderNFT(accountId, titles.getSome(accountId));
-    return { contentType: 'image/svg+xml; charset=UTF-8', body: util.stringToBytes(svg) };
+    return bodyUrl("ipfs://bafybeicnwesuph5jf6dx73f4sgs5tiaxa4idgnvwkglg4voh773ocus7we");
   }
 
   // TODO: 404 and then README, etc

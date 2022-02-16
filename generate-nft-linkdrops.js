@@ -30,7 +30,7 @@ const NUM_LINKS = 50;
                     method_name: "nft_mint_to",
                     args: JSON.stringify({
                         receiver_id: "%%RECEIVER_ID%%", 
-                        title: "January NFT Hangout"
+                        title: "Human Game Jam"
                     }),
                     gas: "10000000000000",
                     deposit: "1"
